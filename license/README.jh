@@ -1,17 +1,17 @@
 ONScripter-Jh
 
-ONScripter��һ����Դ��NScripter�ű����͹��ߣ���Ҫ��Ogapee����ά��
-ԭ���Readme��鿴Readme.old��
+ONScripter は、NScripter スクリプトを実行するためのオープンソースエンジンで、主に Ogapee 氏によって開発・保守されています。
+元の README は Readme.old を参照してください。
 
-����һ���޸İ��ONScripterԴ�룬��GPLv2Э���·�����ʹ��ʱ�����ء�
+これは ONScripter の改造版ソースコードで、GPLv2 ライセンスの下で公開されています。使用する際はライセンス条項に従ってください。
 
-�޸�Ŀ�꣺
-	�ṩ��ԭ��ONScripter���õ����ܣ��ʵ�����һЩ����
-	��������֧��
-	�����ܵļ���ԭ��ONS�ű�
-	
-����
+改造の目的:
+	NScripter と同等以上の機能を提供し、一部の機能を追加する
+	日本語環境のサポート
+	より高速で軽量な ONS スクリプトエンジン
 
-	SDL2��֧�ṩ���ָĽ�������SDL2��������
-	ĿǰWindows��Android��iOS��Linux��Windows Phoneƽ̨������ͨ��ʵ����ã�����ƽ̨δ����
-	PSVita���� wetor(����W���)��ֲ
+謝辞:
+
+	SDL2 のサポートと各種改善を提供してくれた SDL2 コミュニティに感謝します。
+	現在 Windows、Android、iOS、Linux、Windows Phone 環境で動作確認済みです（その他の環境は未確認）。
+	PS Vita 版は wetor 氏によって移植されました。

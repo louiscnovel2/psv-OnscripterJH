@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   if(DEFINED ENV{VITASDK})
@@ -60,7 +60,6 @@ add_executable(${PROJECT_NAME}
   ScriptParser_command.cpp
   coding2utf16.cpp
   # conv_shared.cpp
-  gbk2utf16.cpp
   onscripter_main.cpp
   resize_image.cpp
   sjis2utf16.cpp
@@ -75,6 +74,12 @@ target_link_libraries(${PROJECT_NAME}
   SDL2_ttf
   SDL2_image
   SDL2
+
+  opusfile
+  opus
+  xmp-lite
+  webpdemux
+  webp
 
   vita2d
   vita2d_ext

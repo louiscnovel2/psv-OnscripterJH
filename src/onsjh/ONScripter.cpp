@@ -4,7 +4,7 @@
  *
  *  Copyright (c) 2001-2016 Ogapee. All rights reserved.
  *            (C) 2014-2019 jh10001 <jh10001@live.cn>
- *            (C) 2019-2019 wetor(����W���) <maho.wang>
+ *            (C) 2019-2019 wetor <maho.wang>
  *
  *  ogapee@aqua.dti2.ne.jp
  *
@@ -523,6 +523,19 @@ int ONScripter::init()
             fclose(fp);
         }
 #endif
+        // ゲーム側に default.ttf が無い場合は、アプリ内蔵の
+        // 日本語フォント (app0:default.ttf) を使う。
+        FILE *font_fp = ::fopen(font_file, "rb");
+        if (font_fp == NULL){
+            delete[] font_file;
+            const char *fallback_font = "app0:default.ttf";
+            font_file = new char[ strlen(fallback_font) + 1 ];
+            sprintf( font_file, "%s", fallback_font );
+            utils::printInfo("Font: %s (fallback)\n", font_file);
+        }
+        else{
+            fclose(font_fp);
+        }
     }
     
     // ----------------------------------------

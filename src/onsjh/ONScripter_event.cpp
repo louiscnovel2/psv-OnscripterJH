@@ -4,7 +4,7 @@
  *
  *  Copyright (c) 2001-2016 Ogapee. All rights reserved.
  *            (C) 2014-2016 jh10001 <jh10001@live.cn>
- *            (C) 2019-2019 wetor(����W���?) <maho.wang>
+ *            (C) 2019-2019 wetor <maho.wang>
  *
  *  ogapee@aqua.dti2.ne.jp
  *

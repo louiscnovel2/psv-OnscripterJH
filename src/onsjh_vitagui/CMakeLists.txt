@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   if(DEFINED ENV{VITASDK})
@@ -61,6 +61,7 @@ target_link_libraries(${PROJECT_NAME}
   SceHid_stub
   freetype
   png
+  bz2
   z
   m
   c

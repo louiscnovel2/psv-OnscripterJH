@@ -23971,26 +23971,27 @@ static uint16_t gbk_2_utf16_org[][2] = {
   {0,0}
 };
 
+// GBK 版は日本語版ではビルド対象外です（互換用に残しています）。
 void GBK2UTF16::init() {
-	strcpy(space, "��");
-	strcpy(minus, "��");
-	strcpy(bracket,"����");
-	strcpy(num_str, "��������������������");
-	strcpy(DEFAULT_START_KINSOKU, "�������ݣ����������������c�d�f�g���`");
-	strcpy(DEFAULT_END_KINSOKU, "�������ۣ�");
-	strcpy(DEFAULT_SAVE_MENU_NAME, "�����棾");
-	strcpy(DEFAULT_LOAD_MENU_NAME, "�����룾");
-	strcpy(DEFAULT_SAVE_ITEM_NAME, "��ǩ");
-	strcpy(MESSAGE_SAVE_EXIST, "%s%s��%s��%s��%sʱ%s��");
-	strcpy(MESSAGE_SAVE_EMPTY, "%s%s��������������������������");
-	strcpy(MESSAGE_SAVE_CONFIRM, "������%s%s��");
-	strcpy(MESSAGE_LOAD_CONFIRM, "��ȡ%s%s��");
-	strcpy(MESSAGE_RESET_CONFIRM, "���ر��⣿");
-	strcpy(MESSAGE_END_CONFIRM, "�˳���Ϸ��");
-	strcpy(MESSAGE_YES, "��");
-	strcpy(MESSAGE_NO, "��");
-	strcpy(MESSAGE_OK, "ȷ��");
-	strcpy(MESSAGE_CANCEL, "ȡ��");
+	strcpy(space, "　");
+	strcpy(minus, "－");
+	strcpy(bracket,"【】");
+	strcpy(num_str, "０１２３４５６７８９");
+	strcpy(DEFAULT_START_KINSOKU, "」』）］｝、。！？ヽヾゝゞ々ー");
+	strcpy(DEFAULT_END_KINSOKU, "「『（［｛");
+	strcpy(DEFAULT_SAVE_MENU_NAME, "＜セーブ＞");
+	strcpy(DEFAULT_LOAD_MENU_NAME, "＜ロード＞");
+	strcpy(DEFAULT_SAVE_ITEM_NAME, "しおり");
+	strcpy(MESSAGE_SAVE_EXIST, "%s%s　%s月%s日%s時%s分");
+	strcpy(MESSAGE_SAVE_EMPTY, "%s%s　————————————");
+	strcpy(MESSAGE_SAVE_CONFIRM, "%s%s にセーブしますか？");
+	strcpy(MESSAGE_LOAD_CONFIRM, "%s%s をロードしますか？");
+	strcpy(MESSAGE_RESET_CONFIRM, "タイトルに戻りますか？");
+	strcpy(MESSAGE_END_CONFIRM, "ゲームを終了しますか？");
+	strcpy(MESSAGE_YES, "はい");
+	strcpy(MESSAGE_NO, "いいえ");
+	strcpy(MESSAGE_OK, "決定");
+	strcpy(MESSAGE_CANCEL, "キャンセル");
 
 	gbk_2_utf16 = new uint16_t[CODINGRIGHT - CODINGLEFT + 1];
 	utf16_2_gbk_4e = new uint16_t[0x9fA5-0x4E00+1];

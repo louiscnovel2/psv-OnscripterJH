@@ -4,7 +4,7 @@
  *
  *  Copyright (c) 2001-2018 Ogapee. All rights reserved.
  *            (C) 2014-2019 jh10001 <jh10001@live.cn>
- *            (C) 2019-2019 wetor(����W���) <maho.wang>
+ *            (C) 2019-2019 wetor <maho.wang>
  *
  *  ogapee@aqua.dti2.ne.jp
  *
@@ -2199,7 +2199,7 @@ int ONScripter::gettagCommand()
 
     if (buf[0] == '[')
         buf++;
-    else if (zenkakko_flag && buf[0] == "��"[0] && buf[1] == "��"[1])
+    else if (zenkakko_flag && buf[0] == coding2utf16->bracket[0] && buf[1] == coding2utf16->bracket[1])
         buf += 2;
     else
         buf = NULL;
@@ -2221,7 +2221,7 @@ int ONScripter::gettagCommand()
             if (buf){
                 const char *buf_start = buf;
                 while(*buf != '/' && *buf != 0 && *buf != ']' && 
-                      (!zenkakko_flag || buf[0] != "��"[0] || buf[1] != "��"[1])){
+                      (!zenkakko_flag || buf[0] != coding2utf16->bracket[2] || buf[1] != coding2utf16->bracket[3])){
                     if (IS_TWO_BYTE(*buf))
                         buf += 2;
                     else
@@ -2245,7 +2245,7 @@ int ONScripter::gettagCommand()
     if (pretext_buf[0] == ']')
         pretext_buf++;
     else if (zenkakko_flag && 
-             pretext_buf[0] == "��"[0] && pretext_buf[1] == "��"[1])
+             pretext_buf[0] == coding2utf16->bracket[2] && pretext_buf[1] == coding2utf16->bracket[3])
         pretext_buf += 2;
 
     return RET_CONTINUE;

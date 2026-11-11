@@ -57,25 +57,25 @@ int select_config = 0;
 int g_choose = -1;
 vita2d_font* font;
 const char* help_msg= "\
-使用帮助(游戏内) (help)\n\n\
-○　　　　确认/继续 (confirm)\n\
-╳　　　　按住快进 (skip)\n\
-□　　　　自动模式 (auto)\n\
-△　　　　菜单/关闭回想模式 (menu)\n\
-Ｌ　　　　快进当前页 (skip)\n\
-Ｒ　　　　开启/停止快进 (skip on)\n\
-←→　　　回想模式选择 (backlog)\n\
-↑↓　　　选项/按钮选择 (move cursor)\n\
-左摇杆　　等同方向键 (dpad)\n";
+ゲーム内ヘルプ (help)\n\n\
+○　　　　決定／次へ (confirm)\n\
+×　　　　長押しでスキップ (skip)\n\
+□　　　　オートモード (auto)\n\
+△　　　　メニュー／回想モードを閉じる (menu)\n\
+Ｌ　　　　現在のページをスキップ (skip)\n\
+Ｒ　　　　スキップの開始／停止 (skip on)\n\
+←→　　　回想モードの選択 (backlog)\n\
+↑↓　　　選択肢／ボタンの移動 (move cursor)\n\
+左スティック　　方向キーと同じ (dpad)\n";
 
 const char* about_msg ="\
-　　　关于ONS for PSV\n\n\
+　　　ONS for PSV について\n\n\
 ONScripter 　　　<Ogapee>\n\
 ONScripter-jh　　<jh10001>\n\
 vita-savemgr 　　<d3m3vilurr>\n\
 ONS-jh-PSV 　　 <wetor>\n\n\
-　　　wetor(@依旧W如此)\n\
-maintained and new features by Yurisiziku, \n\
+　　　wetor\n\
+メンテナンス・新機能: Yurisizuku\n\
 https://github.com/YuriSizuku/psv-Onscripter\n";
 
 int game_start_select = -1;
@@ -85,16 +85,16 @@ int cmd[10] = {0};
 int cmd_num = 0;
 char *cmd_str[10];
 string sittings[] = {
-		"强制全屏幕 (full screen)",
-		"缓存字体 (cache font)",
-		"文字阴影 (text shadow)",
-		"显示文字框 (text box)",
-		"日文游戏 (enc: sjis)",
+		"強制全画面 (full screen)",
+		"フォントキャッシュ (cache)",
+		"文字の影 (text shadow)",
+		"テキストボックス (text box)",
 		"",
 		"",
 		"",
-		"恢复默认设置 (reset)",
-		"返回 (return)"
+		"",
+		"設定を初期化 (reset)",
+		"戻る (return)"
 };
 DrawListMode mainscreen_list_mode;
 
@@ -243,14 +243,14 @@ void draw_help() {
 	vita2d_draw_rectangle(0, FOOTER_TOP, ITEMS_PANEL_WIDTH, FOOTER_HEIGHT, BLACK_1);
 	if(rom_list.size() == 0)
 	{
-		vita2d_font_draw_text(font, 5, FOOTER_TOP + FONT_SIZE - 1, WHITE, FONT_SIZE, 
-			"No game! put game into ux0:onsemu/, uma0:onsemu/ or ur0:onsemu/");
+		vita2d_font_draw_text(font, 5, FOOTER_TOP + FONT_SIZE - 1, WHITE, FONT_SIZE - 2, 
+			"ゲームが見つかりません。onsemu フォルダにゲームを配置してください");
 	}
 	else
 	{
 		static char helpbuf[256];
 		snprintf(helpbuf, sizeof(helpbuf), 
-			"L 设置菜单 (menu)   R 查看帮助 (help)   Select 关于 (about)   |  %d/%d", 
+			"L:設定  R:ヘルプ  Select:情報   |  %d/%d", 
 			g_choose + 1, rom_list.size());
 		vita2d_font_draw_text(font, 5, FOOTER_TOP + FONT_SIZE - 1, WHITE, FONT_SIZE , helpbuf);
 	}
@@ -290,13 +290,13 @@ struct config_item {
 
 void draw_config() {
 	struct config_item items[] = {
-		{"显示(graphic mode)",		 strcmp(config.list_mode,"icon") ? "列表(list)" : "图标(icon)"},
-		{"仅按键(use dpad)",		 config.use_dpad ? "启用(on)" : "关闭(off)"},
-		{"图标行数(icon row)",     RomInfo::to_char(config.icon_row)},
-		{"图标列数(icon column)",     RomInfo::to_char(config.icon_col)},
-		{"列表行数(list row)",     RomInfo::to_char(config.list_row)},
-		{"触摸控制(touch mode)", 
-			config.use_btouch == 0 ? "关闭(close)" :(config.use_btouch == 1 ? "仅前触屏(only front touch)" : "前后触屏(both touch)") }
+		{"表示モード (mode)",		 strcmp(config.list_mode,"icon") ? "リスト (list)" : "アイコン (icon)"},
+		{"方向キーのみ (use dpad)",		 config.use_dpad ? "オン (on)" : "オフ (off)"},
+		{"アイコン行 (row)",     RomInfo::to_char(config.icon_row)},
+		{"アイコン列 (column)",     RomInfo::to_char(config.icon_col)},
+		{"リスト行 (row)",     RomInfo::to_char(config.list_row)},
+		{"タッチ (touch mode)", 
+			config.use_btouch == 0 ? "オフ (close)" :(config.use_btouch == 1 ? "前面のみ (only front touch)" : "前後面 (both touch)") }
 	};
 
 	// FIXME: ugly UI
@@ -360,21 +360,21 @@ void draw_appinfo(ScreenState state, int choose) {
 	draw_appinfo_icon(choose);
 	draw_button(APPINFO_BUTTON_LEFT, APPINFO_BUTTON_TOP(0),
 		APPINFO_BUTTON_WIDTH, APPINFO_BUTTON_HEIGHT,
-		RomInfo::to_char("启动(start)"), FONT_SIZE,
+		RomInfo::to_char("起動 (start)"), FONT_SIZE,
 		(state == START_MODE));
 
 	draw_button(APPINFO_BUTTON_LEFT, APPINFO_BUTTON_TOP(1),
 		APPINFO_BUTTON_WIDTH, APPINFO_BUTTON_HEIGHT,
-		RomInfo::to_char("设置(config)"), FONT_SIZE,
+		RomInfo::to_char("設定 (config)"), FONT_SIZE,
 		(state == SETTING_MODE));
 	draw_button(APPINFO_BUTTON_LEFT, APPINFO_BUTTON_TOP(2),
 		APPINFO_BUTTON_WIDTH, APPINFO_BUTTON_HEIGHT,
-		RomInfo::to_char("安装(install)"), FONT_SIZE,
+		RomInfo::to_char("インストール (install)"), FONT_SIZE,
 		(state == SHORTCUT_MODE));
 
 	draw_button(APPINFO_BUTTON_LEFT, APPINFO_BUTTON_TOP(3),
 		APPINFO_BUTTON_WIDTH, APPINFO_BUTTON_HEIGHT,
-		RomInfo::to_char("comming soon"), FONT_SIZE,
+		RomInfo::to_char("準備中 (coming soon)"), FONT_SIZE,
 		(state == DELETE_MODE));
 
 	if (config.use_dpad && state == PRINT_APPINFO) {
@@ -398,7 +398,7 @@ void draw_appinfo(ScreenState state, int choose) {
 		char size_str[16];
 		getPathInfo(rom_list[choose].char_path(), &size, &floder_num, &file_num);
 		getSizeString(size_str, size);
-		sprintf(tmp_str, "name：%s\npath：%s\nsize：%s\nwith：%d files，%d folders", rom_list[choose].char_name(), rom_list[choose].char_path(), size_str, file_num, floder_num);
+		sprintf(tmp_str, "名前：%s\nパス：%s\nサイズ：%s\nファイル：%d 個、フォルダ：%d 個", rom_list[choose].char_name(), rom_list[choose].char_path(), size_str, file_num, floder_num);
 	}
 
 	vita2d_font_draw_text(font,
@@ -436,7 +436,7 @@ void draw_slots(int index_, int slot) {
 			while (tmp.length() < 30)
 				tmp += " ";
 			tmp += "[";
-			tmp += cmd[i] ? "开启(on)" : "关闭(off)";
+			tmp += cmd[i] ? "オン (on)" : "オフ (off)";
 			tmp += "]";
 			if (cmd[i])
 				tmp += "●";
@@ -543,19 +543,19 @@ void draw_screen(ScreenState state, int curr, int choose, int slot) {
 		draw_slots(choose, -1);
 		break;
 	case DELETE_MODE:
-		draw_message((char*)"[暂未开放的功能]", choose, FONT_SIZE);
+		draw_message((char*)"[この機能はまだ利用できません]", choose, FONT_SIZE);
 		break;
 	case SHORTCUT_MODE:
-		draw_message((char*)"是否要生成快捷启动气泡？(Do you want to make package?)", choose, FONT_SIZE);
+		draw_message((char*)"ショートカットを作成しますか？ (Do you want to make package?)", choose, FONT_SIZE);
 		break;
 	case SHORTCUT_WAIT:
-		draw_alert((char*)"正在生成气泡中...请勿操作...(installing)", FONT_SIZE);
+		draw_alert((char*)"ショートカットを作成中です...操作しないでください... (installing)", FONT_SIZE);
 		break;
 	case SHORTCUT_DONE_MODE:
-		draw_alert((char*)"快捷启动气泡生成完毕！(install finish)", FONT_SIZE);
+		draw_alert((char*)"ショートカットを作成しました (install finish)", FONT_SIZE);
 		break;
 	case SHORTCUT_FAIL_MODE:
-		draw_alert((char*)"快捷启动气泡生成失败...(install failed)", FONT_SIZE);
+		draw_alert((char*)"ショートカットの作成に失敗しました... (install failed)", FONT_SIZE);
 		break;
 	default:
 		break;
@@ -1164,6 +1164,7 @@ int game_shortcut(int choose) {
 	sceIoMkdir(path.c_str(), 0777);
 	copyFile("app0:eboot.bin", (path + "/eboot.bin").c_str());//EBOOT
 	copyFile("app0:onsjh.bin", (path + "onsjh.bin").c_str());//ons
+	copyFile("app0:default.ttf", (path + "default.ttf").c_str());//font
 	char *src_path = new char[64];
 	char *dst_path = new char[64];
 	char *tmp_str = new char[512];
@@ -1373,14 +1374,14 @@ int main()
 		init_input();
 
 		confirm_msg = new char[256];
-		sprintf(confirm_msg, "%s 取消(no)    %s 确定(yes)", ICON_CANCEL, ICON_ENTER);
+		sprintf(confirm_msg, "%s キャンセル (no)    %s 決定 (yes)", ICON_CANCEL, ICON_ENTER);
 		confirm_msg_width = vita2d_font_text_width(font, FONT_SIZE, confirm_msg);
 		close_msg = new char[256];
-		sprintf(close_msg, "%s 关闭(close)", ICON_ENTER);
+		sprintf(close_msg, "%s 閉じる (close)", ICON_ENTER);
 		close_msg_width = vita2d_font_text_width(font, FONT_SIZE, close_msg);
 
 		//load_config();
-		load_rom_list();//\BC\D3\D4\D8ͼ\B1\EA
+		load_rom_list();// ゲーム一覧を読み込む
 		while (mainloop() >= 0);
 
 		vita2d_start_drawing();

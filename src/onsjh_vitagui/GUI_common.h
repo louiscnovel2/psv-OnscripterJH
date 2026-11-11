@@ -6,7 +6,7 @@
 #include <vitasdk.h>
 
 #define ICON_CIRCLE   "\xe2\x97\x8b"
-#define ICON_CROSS    "\xe2\x95\xb3"
+#define ICON_CROSS    "\xc3\x97"
 #define ICON_SQUARE   "\xe2\x96\xa1"
 #define ICON_TRIANGLE "\xe2\x96\xb3"
 #define ICON_UPDOWN   "\xe2\x86\x95"
@@ -130,7 +130,7 @@
 #define PACKAGE_TEMP "ux0:onsemu/temp/"
 
 #define SITTINGS_FILE "sittings.txt"
-#define SITTINGS_NUM 5
+#define SITTINGS_NUM 4
 
 #define SITTINGS_DEFAULT 8
 #define SITTINGS_RETURN 9

@@ -958,7 +958,7 @@ int NSSp2Visible(lua_State *state)
     return 0;
 }
 
-//Lua��ͼ����  --jh10001
+// Lua の描画処理 -- jh10001
 int NSDBlt(lua_State *state)
 {
     lua_getglobal(state, ONS_LUA_HANDLER_PTR);

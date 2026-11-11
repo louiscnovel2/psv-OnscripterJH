@@ -4,7 +4,7 @@
  *
  *  Copyright (c) 2001-2018 Ogapee. All rights reserved.
  *            (C) 2014-2019 jh10001 <jh10001@live.cn>
- *            (C) 2019-2019 wetor(����W���) <maho.wang>
+ *            (C) 2019-2019 wetor <maho.wang>
  *            (c) 2022-2022 Yurisizuku 
  *  ogapee@aqua.dti2.ne.jp
  *
@@ -25,7 +25,6 @@
 
 #include "ONScripter.h"
 #include "Utils.h"
-#include "gbk2utf16.h"
 #include "sjis2utf16.h"
 #include "version.h"
 
@@ -66,7 +65,7 @@ void optionHelp()
     printf( "      --render-font-outline\trender the outline of a text instead of casting a shadow\n");
     printf( "      --edit\t\tenable online modification of the volume and variables when 'z' is pressed\n");
     printf( "      --key-exe file\tset a file (*.EXE) that includes a key table\n");
-    printf( "      --enc:sjis\tuse sjis coding script\n");
+    printf( "      --enc:sjis\tuse sjis coding script (default)\n");
     printf( "      --debug:1\t\tprint debug info\n");
     printf( "      --fontcache\tcache default font\n");
     printf( "  -h, --help\t\tshow this help and exit\n");
@@ -86,7 +85,7 @@ void optionVersion()
 #if defined(PSV)
 int VITA_SuspendCallback(int notifyId, int notifyCount, int powerInfo, void *common)
 {
-	if ((powerInfo >> 4) & SCE_POWER_CB_RESUMING) // FIXME: work but... meh ?
+	if (powerInfo & SCE_POWER_CB_APP_RESUMING) // FIXME: work but... meh ?
 	{
 
 	}
@@ -330,7 +329,9 @@ extern "C"
             delete[] args;
         }
 
-        if (coding2utf16 == NULL) coding2utf16 = new GBK2UTF16();
+        // 日本語のノベルゲームは Shift-JIS スクリプトが標準なので、
+        // 既定の文字コードを SJIS にする。
+        if (coding2utf16 == NULL) coding2utf16 = new SJIS2UTF16();
 
         // ----------------------------------------
         // Run ONScripter

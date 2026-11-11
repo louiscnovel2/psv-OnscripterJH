@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   if(DEFINED ENV{VITASDK})
@@ -29,6 +29,8 @@ set(VITA_PACK_ARGS
   -a ${CMAKE_CURRENT_SOURCE_DIR}/asset/logo.png=sce_sys/livearea/contents/logo.png
   -a ${CMAKE_CURRENT_SOURCE_DIR}/asset/startup.png=sce_sys/livearea/contents/startup.png
   -a ${CMAKE_CURRENT_SOURCE_DIR}/asset/template.xml=sce_sys/livearea/contents/template.xml 
+  -a ${CMAKE_CURRENT_SOURCE_DIR}/license/COPYING=COPYING
+  -a ${CMAKE_CURRENT_SOURCE_DIR}/license/OFL-NotoSansJP.txt=OFL-NotoSansJP.txt
 )
 set(VITA_PACK_ARGS ${VITA_PACK_ARGS} 
   -a ${CMAKE_CURRENT_BINARY_DIR}/src/onsjh/onsjh.self=onsjh.bin)

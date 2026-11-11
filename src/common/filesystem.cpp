@@ -2,6 +2,7 @@
 #include <psp2/io/fcntl.h>
 #include <psp2/io/stat.h>
 #include <strings.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "filesystem.h"
