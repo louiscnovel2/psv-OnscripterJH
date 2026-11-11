@@ -13,9 +13,16 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 message("in project " ${PROJECT_NAME})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3 -Wno-unused-variable -Wno-unused-but-set-variable -Wno-format-truncation -fno-lto")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -MMD -MT -MF -std=c++11 -fno-rtti -fno-exceptions -fno-optimize-sibling-calls")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fno-math-errno -MMD -MT -MF -std=c++11 -fno-rtti -fno-exceptions -fno-optimize-sibling-calls")
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1")
 set(VITA_MAKE_FSELF_FLAGS "${VITA_MAKE_FSELF_FLAGS} -a 0x2808000000000001")
+
+# vita-elf-create appends the SCE module information (a few KiB) to the end of
+# the segment that contains module_start.  The Vita linker script only reserves
+# space for this when the __sce_headroom symbol is defined, so without it the
+# data segment often overlaps the appended metadata and linking fails with
+# "Cannot allocate N bytes for SCE data at end of segment 0".
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=__sce_headroom=0x1000")
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/

@@ -1212,11 +1212,30 @@ bool ONScripter::convTouchKey(SDL_TouchFingerEvent &finger) {
 }
 #endif
 
+#if defined(PSV)
+// SDL2 on Vita reports touchId 1 for the front panel and 2 for the back pad
+// (see SDL_vitatouch.c: SDL_SendTouch((SDL_TouchID)(port + 1), ...)).
+// Reading event.ctouchpad.which here was wrong: that union member belongs to
+// SDL_ControllerTouchpadEvent, so the value was garbage and front touches were
+// always discarded.
+static bool acceptTouchEvent(const char *touch_mode, SDL_TouchID touch_id)
+{
+    if (touch_mode == NULL) return true;
+    if (strcmp(touch_mode, "use_not_touch") == 0) return false;
+    if (strcmp(touch_mode, "use_front_only_touch") == 0) return touch_id == 1;
+    return true; // use_front_back_touch
+}
+#endif
+
 void ONScripter::runEventLoop()
 {
     SDL_Event event, tmp_event;
 
-    while ( SDL_WaitEvent(&event) ) {
+    while ( true ) {
+        // Draw the frame accumulated by flushDirect() before blocking again,
+        // so that only one SDL_RenderPresent() happens per loop iteration.
+        presentIfPending();
+        if ( !SDL_WaitEvent(&event) ) break;
 #if defined(USE_SMPEG)
         // required to repeat the movie
         if (layer_smpeg_sample)
@@ -1237,10 +1256,7 @@ void ONScripter::runEventLoop()
         case SDL_FINGERMOTION:
         {
 #if defined(PSV)
-            if(strcmp(touchMode, "use_front_only_touch")==0)
-            {
-                if(event.ctouchpad.which!=0) break;  // 0 front, 1 back
-            }
+            if (!acceptTouchEvent(touchMode, event.tfinger.touchId)) break;
 #endif
             if (!btndown_flag && convTouchKey(event.tfinger)) return;
             tmp_event.motion.x = device_width * event.tfinger.x - (device_width - screen_device_width) / 2;
@@ -1263,10 +1279,7 @@ void ONScripter::runEventLoop()
         case SDL_FINGERDOWN:
         {
 #if defined(PSV)
-            if(strcmp(touchMode, "use_front_only_touch")==0)
-            {
-                if(event.ctouchpad.which!=0) break; 
-            }
+            if (!acceptTouchEvent(touchMode, event.tfinger.touchId)) break;
 #endif
             convTouchKey(event.tfinger);
             tmp_event.motion.x = device_width * event.tfinger.x - (device_width - screen_device_width) / 2;
@@ -1294,10 +1307,7 @@ void ONScripter::runEventLoop()
         case SDL_FINGERUP:
         {
 #if defined(PSV)
-            if(strcmp(touchMode, "use_front_only_touch")==0)
-            {
-                if(event.ctouchpad.which!=0) break; 
-            }
+            if (!acceptTouchEvent(touchMode, event.tfinger.touchId)) break;
 #endif
             if (num_fingers == 0) break;
             {

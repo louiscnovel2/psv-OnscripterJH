@@ -308,6 +308,8 @@ ONScripter::ONScripter()
     current_button_state.down_flag = false;
     compatibilityMode = false;
     vsync = true;
+    screen_dirty_flag = false;
+    pending_present = false;
 
     int i;
     for (i=0 ; i<MAX_SPRITE2_NUM ; i++)
@@ -821,7 +823,24 @@ void ONScripter::flushDirect(SDL_Rect &rect, int refresh_mode)
 #else
         SDL_RenderCopy(renderer, texture, &dst_rect, &dst_rect);
 #endif
+#if defined(PSV)
+    // Defer the actual present to ONScripter::runEventLoop().  Presenting on
+    // every flush makes the GXM display queue stall (multiple presents per
+    // frame), which is the main cause of the low frame rate.
+    pending_present = true;
+#else
     SDL_RenderPresent(renderer);
+#endif
+}
+
+void ONScripter::presentIfPending()
+{
+#if defined(PSV)
+    if (pending_present){
+        pending_present = false;
+        SDL_RenderPresent(renderer);
+    }
+#endif
 }
 
 #ifdef USE_SMPEG

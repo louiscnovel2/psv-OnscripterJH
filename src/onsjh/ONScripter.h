@@ -368,6 +368,7 @@ private:
     bool vsync;
     bool cacheFont;
     bool screen_dirty_flag;
+    bool pending_present; // PSV: defer SDL_RenderPresent() to once per event loop
 
     // variables relevant to button
     ButtonState current_button_state, last_mouse_state;
@@ -433,6 +434,7 @@ private:
     void resetSentenceFont();
     void flush( int refresh_mode, SDL_Rect *rect=NULL, bool clear_dirty_flag=true, bool direct_flag=false );
     void flushDirect( SDL_Rect &rect, int refresh_mode );
+    void presentIfPending();
     #ifdef USE_SMPEG
     void flushDirectYUV(SDL_Overlay *overlay);
     #endif
