@@ -18,9 +18,10 @@ Yurisizuku が保守を行い、コード構成の最適化や機能追加（動
 - [ ] 動作確認済みゲームリストの整備
 - [ ] その他の改善（随時追加）
 
-![vitaons_test2](./screenshot/vitaons_test2.jpg)
-![vitaons_test3](./screenshot/vitaons_test3.jpg)
-![vitaons_bg](./asset/bg.png)
+![「BluePrints～ミライへのミチしるべ～」起動画面](./screenshot/blueprints_001.jpg)
+![「BluePrints～ミライへのミチしるべ～」プレイ画面](./screenshot/blueprints_002.jpg)
+![「黄昏ウィズ -Twilight Invocation-」起動画面](./screenshot/twilightwiz_001.jpg)
+![「黄昏ウィズ -Twilight Invocation-」イラスト画面](./screenshot/twilightwiz_002.jpg)
 
 エミュレータ向けの別 MOD はこちらです。  
 [Mine_v1.5_yuri（Android 版）](https://github.com/YuriSizuku/Kirikiroid2/releases/download/1.3.9_yuri/Kirikiroid2_yuri_1.3.9.apk)  
