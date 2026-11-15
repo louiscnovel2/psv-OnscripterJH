@@ -3,7 +3,6 @@
 #include <vitasdk.h>
 #include <iostream>
 #define PACKAGE_TEMP_FOLDER std::string("ux0:/temp/pkg/")
-#define SFO_SIZE 912
 
 class VitaPackage{
 public:
@@ -14,8 +13,9 @@ public:
   int SetSFOString(std::string title, std::string title_id);
   int Install();
   //int Install();
+  // Always ends with a '/' (e.g. "ux0:/temp/pkg/")
   static std::string Package_path;
 private:
+  // Never ends with a '/' (scePromoterUtilityPromotePkg() requires it)
   std::string path_;
 };
-

@@ -1135,82 +1135,172 @@ void  game_start(int choose) {
 	game_start_select = choose;
 }
 
-char* get_title_id() {
-	int ret;
-	char *title_id;
-	title_id = new char[32];
-	int num = -1;
-	do {
-		num++;
-		sprintf(title_id, "ux0:app/ONSVG0%03d/\0", num);
-		ret = checkFolderExist(title_id);
-		printf("%d %s\n",ret, title_id);
-	} while (ret);
-	sprintf(title_id, "ONSVG0%03d\0", num);
-	return title_id;
+#define SCE_ERROR_ERRNO_EEXIST 0x80010011
+
+static bool title_id_exists(const string &title_id) {
+	static const char *const folders[] = {
+		"ux0:app/",
+		"ux0:appmeta/",
+		"ux0:patch/",
+	};
+
+	for (unsigned int i = 0; i < sizeof(folders) / sizeof(folders[0]); i++) {
+		if (checkFolderExist((folders[i] + title_id).c_str()))
+			return true;
+	}
+	return false;
+}
+
+static string get_free_title_id() {
+	char title_id[10];
+	for (int num = 0; num < 10000; num++) {
+		snprintf(title_id, sizeof(title_id), "ONSVG%04d", num);
+		if (!title_id_exists(title_id))
+			return string(title_id);
+	}
+	return string();
 }
 
 int game_shortcut(int choose) {
 	string path = PACKAGE_TEMP;
+	// Remove the trailing '/' so that paths are not built with a double '/'
+	while (!path.empty() && path.back() == '/')
+		path.pop_back();
+
 	int ret;
 	if (checkFolderExist(path.c_str())) {
 		ret = removePath(path);
-		if (ret < 0) {
-			printf("removePath() = 0x%08X\n", ret);
+		if (ret <= 0) {
+			printf("removePath(%s) = 0x%08X\n", path.c_str(), ret);
+			return 0;
 		}
 	}
 
 //temp:EBOOT
-	sceIoMkdir(path.c_str(), 0777);
-	copyFile("app0:eboot.bin", (path + "/eboot.bin").c_str());//EBOOT
-	copyFile("app0:onsjh.bin", (path + "onsjh.bin").c_str());//ons
-	copyFile("app0:default.ttf", (path + "default.ttf").c_str());//font
-	char *src_path = new char[64];
-	char *dst_path = new char[64];
-	char *tmp_str = new char[512];
-//sittings.txt
-	sprintf(src_path, "%s/%s", rom_list[choose].char_path(), SITTINGS_FILE);
-	sprintf(dst_path, "%s/%s", path.c_str(), SITTINGS_FILE);
-	copyFile(src_path, dst_path);
+	ret = sceIoMkdir("ux0:onsemu", 0777);
+	if (ret < 0 && ret != SCE_ERROR_ERRNO_EEXIST) {
+		printf("sceIoMkdir(ux0:onsemu) = 0x%08X\n", ret);
+		return 0;
+	}
+
+	ret = sceIoMkdir(path.c_str(), 0777);
+	if (ret < 0) {
+		printf("sceIoMkdir(%s) = 0x%08X\n", path.c_str(), ret);
+		return 0;
+	}
+
+	const char *const files[][2] = {
+		{ "app0:eboot.bin", "eboot.bin" },
+		{ "app0:onsjh.bin", "onsjh.bin" },
+		{ "app0:default.ttf", "default.ttf" },
+	};
+	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); i++) {
+		string dst = path + "/" + files[i][1];
+		ret = copyFile(files[i][0], dst.c_str());
+		if (ret <= 0) {
+			printf("copyFile(%s, %s) = 0x%08X\n", files[i][0], dst.c_str(), ret);
+			return 0;
+		}
+	}
+
+//sittings.txt (the shortcut needs it to start the game without showing the UI)
+	string sittings_src = rom_list[choose].path + "/" + SITTINGS_FILE;
+	string sittings_dst = path + "/" + SITTINGS_FILE;
+	if (checkFileExist(sittings_src.c_str())) {
+		ret = copyFile(sittings_src.c_str(), sittings_dst.c_str());
+		if (ret <= 0) {
+			printf("copyFile(%s, %s) = 0x%08X\n", sittings_src.c_str(), sittings_dst.c_str(), ret);
+			return 0;
+		}
+	}
+	else {
+		// The game has never been configured, write the same defaults as
+		// sittings_file() so that the shortcut starts the game directly
+		FILE *sittings = fopen(sittings_dst.c_str(), "w");
+		if (!sittings) {
+			printf("fopen(%s) failed\n", sittings_dst.c_str());
+			return 0;
+		}
+		fputs("--window --fontcache --textbox", sittings);
+		if (fclose(sittings) != 0) {
+			printf("fclose(%s) failed\n", sittings_dst.c_str());
+			return 0;
+		}
+	}
+
 //startup.ini
-	sprintf(dst_path, "%s/%s", path.c_str(), "startup.ini");
-	FILE * tmp = fopen(dst_path, "w");
-	sprintf(tmp_str,
+	string ini_path = path + "/startup.ini";
+	FILE *ini = fopen(ini_path.c_str(), "w");
+	if (!ini) {
+		printf("fopen(%s) failed\n", ini_path.c_str());
+		return 0;
+	}
+	fprintf(ini,
 		"[AUTO_START]\n"
 		"use_btouch = %d\n"
 		"rom_path = %s",
 		config.use_btouch,
-		rom_list[choose].char_path()
+		rom_list[choose].path.c_str()
 	);
-	fprintf(tmp, tmp_str);
-	fclose(tmp);
+	if (fclose(ini) != 0) {
+		printf("fclose(%s) failed\n", ini_path.c_str());
+		return 0;
+	}
 
-	free(src_path);
-	free(dst_path);
-	free(tmp_str);
 //sce_sys
-	sceIoMkdir((path + "/sce_sys/").c_str(), 0777);
-	//copyFile(rom_list[choose].char_icon_path(), (path + "/sce_sys/icon0.png").c_str());
-	copyFile("app0:sce_sys/icon0.png", (path + "/sce_sys/icon0.png").c_str());
-	copyFile("app0:sce_sys/param.sfo", (path + "/sce_sys/param.sfo").c_str());
-	copyPath("app0:sce_sys/livearea", (path + "/sce_sys/livearea").c_str());
+	string sce_sys = path + "/sce_sys";
+	ret = sceIoMkdir(sce_sys.c_str(), 0777);
+	if (ret < 0) {
+		printf("sceIoMkdir(%s) = 0x%08X\n", sce_sys.c_str(), ret);
+		return 0;
+	}
+
+	string icon_dst = sce_sys + "/icon0.png";
+	ret = copyFile("app0:sce_sys/icon0.png", icon_dst.c_str());
+	if (ret <= 0) {
+		printf("copyFile(app0:sce_sys/icon0.png, %s) = 0x%08X\n", icon_dst.c_str(), ret);
+		return 0;
+	}
+
+	string sfo_dst = sce_sys + "/param.sfo";
+	ret = copyFile("app0:sce_sys/param.sfo", sfo_dst.c_str());
+	if (ret <= 0) {
+		printf("copyFile(app0:sce_sys/param.sfo, %s) = 0x%08X\n", sfo_dst.c_str(), ret);
+		return 0;
+	}
+
+	string livearea_dst = sce_sys + "/livearea";
+	ret = copyPath("app0:sce_sys/livearea", livearea_dst.c_str());
+	if (ret <= 0) {
+		printf("copyPath(app0:sce_sys/livearea, %s) = 0x%08X\n", livearea_dst.c_str(), ret);
+		return 0;
+	}
+
 //TITLE ID
-	SceDateTime time, time_local;
-	sceRtcGetCurrentClock(&time, 0);
-	convertUtcToLocalTime(&time_local,&time);
-	char *title_id_tmp;
-	title_id_tmp = new char[10];
-	sprintf(title_id_tmp, "G%02d%02d%02d%02d", time_local.day, time_local.hour, time_local.minute, time_local.second);
+	string title_id = get_free_title_id();
+	if (title_id.empty()) {
+		printf("No free title id\n");
+		return 0;
+	}
 
 //TITLE
-	string title = getFileName(rom_list[choose].path);
+	string title = rom_list[choose].name.empty() ? getFileName(rom_list[choose].path) : rom_list[choose].name;
+	while (!title.empty() && (title.back() == '\n' || title.back() == '\r'))
+		title.pop_back();
+
 //Install
 	VitaPackage pkg(path);
-	pkg.SetSFOString(title, title_id_tmp);
+	if (pkg.SetSFOString(title, title_id) < 0) {
+		printf("SetSFOString(%s, %s) failed\n", title.c_str(), title_id.c_str());
+		return 0;
+	}
+
 	ret = pkg.Install();
-	if(!ret)
-		printf("Shortcut fail\n", ret);
-	return ret;
+	if (!ret) {
+		printf("Shortcut fail\n");
+		return 0;
+	}
+	return 1;
 }
 
 int mainloop() {

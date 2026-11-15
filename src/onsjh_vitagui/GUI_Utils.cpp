@@ -334,7 +334,11 @@ int parseOption(string &cmdstr,int (&cmd)[10],char *cmd_str[10],int flag = 0) {
 }
 
 void sittings_file(string path,string &str,char mode,int nowrite) {
-	string filename = path + "/" + SITTINGS_FILE;
+	string filename = path;
+	// Avoid a double '/' for paths like "app0:"
+	if (filename.empty() || (filename.back() != '/' && filename.back() != ':'))
+		filename += "/";
+	filename += SITTINGS_FILE;
 	if (mode == 'r') {
 		str = "";
 		FILE *fp = fopen(filename.c_str(), "r");

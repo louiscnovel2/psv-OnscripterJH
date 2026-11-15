@@ -17,7 +17,8 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 ## Configuration options for this app
 set(VITA_APP_NAME "Vita Ons")
 set(VITA_TITLEID  "VITAONSJH")
-set(VITA_VERSION  "00.51")
+set(VITA_APP_VERSION "0.3.0")
+set(VITA_VERSION  "00.30")
 
 # use this for custom target denpends
 set(VITA_PACK_ARGS 
@@ -48,8 +49,8 @@ else()
 endif()
 
 add_custom_target(vpk
-  echo "prepare for making ${PROJECT_NAME}.vpk ..."
+  echo "prepare for making VitaOns-${VITA_APP_VERSION}.vpk ..."
   COMMAND vita-mksfoex -s APP_VER=${VITA_VERSION} -s TITLE_ID=${VITA_TITLEID} ${VITA_APP_NAME} ${CMAKE_CURRENT_BINARY_DIR}/param.sfo
-  COMMAND vita-pack-vpk ${VITA_PACK_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vpk
+  COMMAND vita-pack-vpk ${VITA_PACK_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/VitaOns-${VITA_APP_VERSION}.vpk
   DEPENDS ${VITAONS_DEPENDS}
 )
