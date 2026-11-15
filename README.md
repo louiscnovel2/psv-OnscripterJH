@@ -78,8 +78,6 @@ PS Vita のハードウェアデコーダーが再生できるのは `avc yuv420
 ffmpeg -i op.mpg -c:v libx264 -c:a aac -pix_fmt yuv420p op.mp4
 ```
 
-![vitaons_mo2](screenshot/vitaons_mo2.png)
-
 ## 3. 操作
 
 ゲーム内の操作は次のとおりです。
