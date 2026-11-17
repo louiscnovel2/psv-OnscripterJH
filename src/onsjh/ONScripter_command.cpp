@@ -966,17 +966,55 @@ int ONScripter::savescreenshotCommand()
         delete_flag = false;
     }       
 
-    if (screenshot_surface == NULL)
-        screenshot_surface = AnimationInfo::alloc32bitSurface(screen_device_width, screen_device_height, texture_format);
-
-    SDL_Surface *surface = AnimationInfo::alloc32bitSurface( screenshot_w, screenshot_h, texture_format );
-    resizeSurface( screenshot_surface, surface );
-
     const char *buf = script_h.readStr();
-    SDL_RWops *rwops = (SDL_RWops*)SDL_RWFromFile(buf, "wb");
-    if (rwops == nullptr || SDL_SaveBMP_RW(text_info.image_surface, rwops, 1) != 0)
-        utils::printError("Save screenshot failed: %s\n", SDL_GetError());
-    SDL_FreeSurface(surface);
+    if (screenshot_surface == NULL){
+        utils::printError("savescreenshot: no screenshot has been captured (%s)\n", buf);
+        return RET_CONTINUE;
+    }
+
+    // Shrink the captured full-screen image down to the size requested by
+    // getscreenshot (e.g. 180x101) and save *that* surface, not the text
+    // window image.
+    SDL_Surface *surface = AnimationInfo::alloc32bitSurface( screenshot_w, screenshot_h, texture_format );
+    if (surface){
+        resizeSurface( screenshot_surface, surface );
+
+        // The game script already passes a path relative to the game root
+        // (e.g. "save\save1.jpg"), which is also how fileexist/image loading
+        // resolve it through the archive reader.  Do NOT prepend save_dir
+        // here: the script's `savedir "save"` makes save_dir end in "save/",
+        // so using it would produce save/save/save1.jpg.
+        char filename[512];
+        const char *base = archive_path;
+        snprintf( filename, sizeof(filename), "%s%s", base, buf );
+        for ( char *p = filename ; *p ; p++ )
+            if ( *p == '/' || *p == '\\' ) *p = (char)DELIMITER;
+
+        SDL_RWops *rwops = SDL_RWFromFile( filename, "wb" );
+        if (rwops == NULL){
+            utils::printError("Save screenshot failed: can't open %s\n", filename);
+        }
+        else{
+            const char *ext = strrchr( buf, '.' );
+            int ret;
+            if ( ext && (SDL_strcasecmp( ext, ".jpg" ) == 0 ||
+                         SDL_strcasecmp( ext, ".jpeg" ) == 0) )
+                ret = IMG_SaveJPG_RW( surface, rwops, 1, 90 );
+            else if ( ext && SDL_strcasecmp( ext, ".png" ) == 0 )
+                ret = IMG_SavePNG_RW( surface, rwops, 1 );
+            else
+                ret = SDL_SaveBMP_RW( surface, rwops, 1 );
+
+            if ( ret != 0 )
+                utils::printError("Save screenshot failed: %s (%s)\n", filename, SDL_GetError());
+        }
+        SDL_FreeSurface( surface );
+    }
+
+    if ( delete_flag ){
+        SDL_FreeSurface( screenshot_surface );
+        screenshot_surface = NULL;
+    }
 
     return RET_CONTINUE;
 }
@@ -2317,13 +2355,24 @@ int ONScripter::getscreenshotCommand()
     screenshot_w = w;
     screenshot_h = h;
 
-    if (screenshot_surface == NULL) screenshot_surface = AnimationInfo::alloc32bitSurface(render_view_rect.w, render_view_rect.h, texture_format);
-    if (screen_dirty_flag) {
-        SDL_LockSurface(screenshot_surface); 
-        SDL_RenderReadPixels(renderer, &render_view_rect, 0, screenshot_surface->pixels, screenshot_surface->pitch); // fix here
-        SDL_UnlockSurface(screenshot_surface);
-    } else {
-        SDL_BlitSurface(accumulation_surface, nullptr, screenshot_surface, nullptr);
+    // Keep a full-resolution copy of the current screen; it is resized to
+    // screenshot_w x screenshot_h when the screenshot is actually saved.
+    if (screenshot_surface == NULL ||
+        screenshot_surface->w != screen_width ||
+        screenshot_surface->h != screen_height){
+        if (screenshot_surface){
+            SDL_FreeSurface(screenshot_surface);
+            screenshot_surface = NULL;
+        }
+        screenshot_surface = AnimationInfo::alloc32bitSurface(screen_width, screen_height, texture_format);
+    }
+
+    if (screenshot_surface){
+        // accumulation_surface is the composed game screen (background,
+        // standing pictures, message window and text).  It is already in the
+        // renderer's texture format, so a plain blit is enough and avoids a
+        // format-mismatched SDL_RenderReadPixels().
+        SDL_BlitSurface(accumulation_surface, NULL, screenshot_surface, NULL);
     }
 
     return RET_CONTINUE;

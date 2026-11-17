@@ -789,6 +789,16 @@ void ONScripter::flushDirect(SDL_Rect &rect, int refresh_mode)
 {
     // SDL_Log("## flushDirect refresh_mode=%d, rect(%d,%d,%d,%d)\n", refresh_mode, rect.x, rect.y, rect.w, rect.h );  
     SDL_Rect dst_rect = {0, 0, 960, 544}; // not use this now
+
+    // Clip the dirty rectangle to the game screen before it reaches
+    // SDL_UpdateTexture().  Standing pictures (立ち絵) are often anchored at
+    // negative coordinates (e.g. lsp ...,-100,0), and passing such a rect to
+    // SDL_UpdateTexture() computed a pixel pointer outside the surface and
+    // updated the wrong texture region, corrupting the background, window and
+    // text.  doClipping() returns non-zero when there is nothing to draw.
+    SDL_Rect clipped_rect = rect;
+    if (AnimationInfo::doClipping(&clipped_rect, &screen_rect)) return;
+
 #if defined(PSV)
 	if (!fullscreen_mode)  
     {
@@ -801,10 +811,10 @@ void ONScripter::flushDirect(SDL_Rect &rect, int refresh_mode)
     if (AnimationInfo::doClipping(&dst_rect, &screen_rect) || (dst_rect.w == 2 && dst_rect.h == 2)) return;
 #endif
 
-    refreshSurface(accumulation_surface, &rect, refresh_mode);
+    refreshSurface(accumulation_surface, &clipped_rect, refresh_mode);
     SDL_LockSurface(accumulation_surface);
-    SDL_UpdateTexture(texture, (SDL_Rect*)&rect, 
-        (unsigned char*)accumulation_surface->pixels+accumulation_surface->pitch*rect.y+rect.x*sizeof(ONSBuf), 
+    SDL_UpdateTexture(texture, (SDL_Rect*)&clipped_rect, 
+        (unsigned char*)accumulation_surface->pixels+accumulation_surface->pitch*clipped_rect.y+clipped_rect.x*sizeof(ONSBuf), 
         accumulation_surface->pitch);
     SDL_UnlockSurface(accumulation_surface);
 
